@@ -1,0 +1,143 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    def config = rootProject.ext.configuration
+
+    compileSdkVersion config.compileSdkVersion
+    buildToolsVersion config.buildToolsVersion
+
+    defaultConfig {
+        applicationId config.package
+        minSdkVersion config.minSdkVersion
+        targetSdkVersion config.targetSdkVersion
+        versionCode config.versionCode
+        versionName config.versionName
+        testInstrumentationRunner config.testInstrumentationRunner
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            debuggable false
+            testCoverageEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            debuggable true
+        }
+    }
+
+    flavorDimensions "environment", "loging"
+
+    productFlavors {
+        def FLAVOUR_APP_NAME_KEY = "flavour_app_name"
+        def NASA_BASE_API_URL = "NASA_BASE_URL"
+        def LOGGING_ENABLED_KEY = "logEnabled"
+        def flavourConfig = rootProject.ext.flavourConfig
+        def NETWORK_CACHE_SIZE = "NETWORK_CACHE_SIZE"
+
+        dev {
+            // Assigns this product flavor to the "version" flavor dimension.
+            // If you are using only one dimension, this property is optional,
+            // and the plugin automatically assigns all the module's flavors to
+            // that dimension.
+            dimension "environment"
+            applicationIdSuffix flavourConfig.dev.appIdSuffix
+            versionNameSuffix flavourConfig.dev.versionNameSuffix
+            resValue("string", FLAVOUR_APP_NAME_KEY, flavourConfig.dev.appName)
+            buildConfigField("String", NASA_BASE_API_URL, flavourConfig.dev.nasaApi)
+            buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+
+        }
+
+        qa {
+            dimension "environment"
+            applicationIdSuffix flavourConfig.qa.appIdSuffix
+            versionNameSuffix flavourConfig.qa.versionNameSuffix
+            resValue("string", FLAVOUR_APP_NAME_KEY, flavourConfig.qa.appName)
+            buildConfigField("String", NASA_BASE_API_URL, flavourConfig.qa.nasaApi)
+            buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+        }
+
+        prod {
+            dimension "environment"
+            applicationIdSuffix flavourConfig.prod.appIdSuffix
+            versionNameSuffix flavourConfig.prod.versionNameSuffix
+            resValue("string", FLAVOUR_APP_NAME_KEY, flavourConfig.prod.appName)
+            buildConfigField("String", NASA_BASE_API_URL, flavourConfig.prod.nasaApi)
+            buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+        }
+
+        logged {
+            dimension "loging"
+            buildConfigField("boolean", LOGGING_ENABLED_KEY, flavourConfig.logged.logEnabled)
+        }
+
+        nolog {
+            dimension "loging"
+            buildConfigField("boolean", LOGGING_ENABLED_KEY, flavourConfig.nolog.logEnabled)
+        }
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+}
+
+dependencies {
+    def libs = rootProject.ext.libPackages
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation libs.impl.kotlinJdk
+    implementation libs.impl.anrdoidxCompat
+    implementation libs.impl.kotlinCore
+    implementation libs.impl.constraintLayout
+    implementation libs.impl.lifecycleExt
+    androidTestImplementation libs.impl.junitExt
+    testImplementation libs.impl.junit
+    androidTestImplementation libs.impl.espresso
+    implementation libs.impl.recyclerView
+    implementation libs.impl.navigationFragmentKtx
+    implementation libs.impl.navigationUiKtx
+    implementation libs.impl.navigationDynamicFeatureFragment
+    androidTestImplementation libs.impl.navigationTesting
+    debugImplementation libs.impl.leakCanary
+    implementation libs.impl.stetho
+
+    kapt libs.annotationProcessor.dagger
+    kapt libs.annotationProcessor.daggerAndroid
+    implementation libs.impl.dagger
+
+    implementation libs.impl.timber
+    implementation libs.impl.rxJava
+    implementation libs.impl.rxAndroid
+    testImplementation libs.impl.mockito
+    implementation libs.impl.retrofit
+    implementation libs.impl.retrofitJsonConverter
+    implementation libs.impl.preferenceKtx
+    implementation libs.impl.stethoOkhttp
+    implementation libs.impl.retrofitRxJava
+    implementation libs.impl.glide
+    //implementation libs.impl.pagingRuntimeKtx
+    //testImplementation libs.impl.pagingCommon
+    //implementation libs.impl.pagingRxJava
+
+    kapt libs.annotationProcessor.dagger
+    kapt libs.annotationProcessor.daggerAndroid
+
+    implementation  libs.impl.materialDesign
+}
