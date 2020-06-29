@@ -5,7 +5,6 @@ import com.amit.nasablog.model.api.NasaApi
 import com.amit.nasablog.model.entity.BlogDetail
 import com.amit.nasablog.utils.AppExecutors
 import io.reactivex.disposables.CompositeDisposable
-import java.util.*
 import javax.inject.Inject
 
 class NasaBlogRepository @Inject constructor(
@@ -14,35 +13,12 @@ class NasaBlogRepository @Inject constructor(
 ) {
     private val compositeDisposable = CompositeDisposable()
     val blogData = BlogData()
-    fun loadBlog() {
+    fun loadBlog(date: String? = null) {
         if (blogData.networkStatus.value == NetworkStatus.IN_PROGRESS) {
             return
         }
         setNetworkStatus(NetworkStatus.IN_PROGRESS)
-        val disposable = api.getBlogData(BuildConfig.NASA_API_KEY)
-            .subscribeOn(executor.networkIOScheduler())
-            .observeOn(executor.mainThreadScheduler())
-            .subscribe({
-                setNetworkStatus(NetworkStatus.IDLE)
-                if (it.isSuccessful) {
-                    setBlogData(it.body())
-                } else {
-                    setBlogData(null)
-                    setError(Exception("Server error occured"))
-                }
-            }, {
-                setNetworkStatus(NetworkStatus.IDLE)
-                setError(it)
-            })
-        compositeDisposable.add(disposable)
-    }
-
-    fun loadBlog(date: Date) {
-        if (blogData.networkStatus.value == NetworkStatus.IN_PROGRESS) {
-            return
-        }
-        setNetworkStatus(NetworkStatus.IN_PROGRESS)
-        val disposable = api.getBlogData(BuildConfig.NASA_API_KEY, date = date.toString())
+        val disposable = api.getBlogData(BuildConfig.NASA_API_KEY, date)
             .subscribeOn(executor.networkIOScheduler())
             .observeOn(executor.mainThreadScheduler())
             .subscribe({

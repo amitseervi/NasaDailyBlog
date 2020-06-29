@@ -1,6 +1,7 @@
 package com.amit.nasablog.model.entity
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -14,7 +15,7 @@ data class BlogDetail(
     @SerializedName("service_version") val serviceVersion: String?,
     @SerializedName("title") val title: String?,
     @SerializedName("url") val url: String?
-) {
+) : Serializable {
     fun isVideoSource(): Boolean {
         return mediaType == "video"
     }
