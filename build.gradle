@@ -47,6 +47,7 @@ ext {
                     appIdSuffix      : ".qa",
                     versionNameSuffix: "-qa",
                     nasaApi          : "\"https://api.nasa.gov/\"",
+                    apiKey           : "\"DEMO_KEY\"",
                     cacheSize        : "5L * 1024 * 1024"
             ],
             prod  : [
@@ -54,6 +55,7 @@ ext {
                     appIdSuffix      : "",
                     versionNameSuffix: "",
                     nasaApi          : "\"https://api.nasa.gov/\"",
+                    apiKey           : "\"DEMO_KEY\"",
                     cacheSize        : "10L * 1024 * 1024"
             ],
             dev   : [
@@ -61,6 +63,7 @@ ext {
                     appIdSuffix      : ".dev",
                     versionNameSuffix: "-dev",
                     nasaApi          : "\"https://api.nasa.gov/\"",
+                    apiKey           : "\"DEMO_KEY\"",
                     cacheSize        : "1L * 1024 * 1024"
             ],
             logged: [

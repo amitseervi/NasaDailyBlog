@@ -19,7 +19,7 @@ class AppExecutors(
     @Inject
     constructor() : this(
         Executors.newSingleThreadExecutor(),
-        Executors.newFixedThreadPool(5),
+        Executors.newCachedThreadPool(),
         MainThreadExecutor()
     )
 

@@ -15,6 +15,7 @@ import dagger.Provides
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -33,6 +34,7 @@ abstract class AppModule {
         fun provideNasaBlogApi(okHttpClient: OkHttpClient, gson: Gson): NasaApi {
             val retrofit = Retrofit.Builder().client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .baseUrl(BuildConfig.NASA_BASE_URL)
                 .build()
 
