@@ -20,6 +20,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
 
     }
 }
@@ -47,24 +48,30 @@ ext {
                     appIdSuffix      : ".qa",
                     versionNameSuffix: "-qa",
                     nasaApi          : "\"https://api.nasa.gov/\"",
-                    apiKey           : "\"DEMO_KEY\"",
-                    cacheSize        : "5L * 1024 * 1024"
+                    apiKey           : "\"oY1dy9PtR6sCT0qRf9MztEpqoX3ZfSSnVXfLxEWi\"",
+                    cacheSize        : "5L * 1024 * 1024",
+                    maxAge           : "60L * 60L",
+                    maxStale         : "60L * 60L * 24L * 7L"
             ],
             prod  : [
                     appName          : "NasaBlog",
                     appIdSuffix      : "",
                     versionNameSuffix: "",
                     nasaApi          : "\"https://api.nasa.gov/\"",
-                    apiKey           : "\"DEMO_KEY\"",
-                    cacheSize        : "10L * 1024 * 1024"
+                    apiKey           : "\"oY1dy9PtR6sCT0qRf9MztEpqoX3ZfSSnVXfLxEWi\"",
+                    cacheSize        : "10L * 1024 * 1024",
+                    maxAge           : "60L * 5L",
+                    maxStale         : "60L * 60L * 24L * 7L"
             ],
             dev   : [
                     appName          : "dev-NasaBlog",
                     appIdSuffix      : ".dev",
                     versionNameSuffix: "-dev",
                     nasaApi          : "\"https://api.nasa.gov/\"",
-                    apiKey           : "\"DEMO_KEY\"",
-                    cacheSize        : "1L * 1024 * 1024"
+                    apiKey           : "\"oY1dy9PtR6sCT0qRf9MztEpqoX3ZfSSnVXfLxEWi\"",
+                    cacheSize        : "1L * 1024 * 1024",
+                    maxAge           : "60L * 60L * 12",
+                    maxStale         : "60L * 60L * 24L * 7L"
             ],
             logged: [
                     logEnabled: "true"
@@ -103,7 +110,10 @@ ext {
             fresco          : "1.13.0",
             glide           : "4.11.0",
             paging          : "2.1.2",
-            materialDesign  : "1.2.0-beta01"
+            materialDesign  : "1.2.0-beta01",
+            touchView       : "3.0.2",
+            exoplayer       : "2.9.5",
+            youtubeExtractor: "v1.7.0"
     ]
 
     libPackages = [
@@ -158,7 +168,10 @@ ext {
                     pagingRuntimeKtx                : "androidx.paging:paging-runtime-ktx:${libVersions.paging}",
                     pagingCommon                    : "androidx.paging:paging-common:${libVersions.paging}",
                     pagingRxJava                    : "androidx.paging:paging-rxjava2:${libVersions.paging}",
-                    materialDesign                  : "com.google.android.material:material:${libVersions.materialDesign}"
+                    materialDesign                  : "com.google.android.material:material:${libVersions.materialDesign}",
+                    touchView                       : "com.github.MikeOrtiz:TouchImageView:${libVersions.touchView}",
+                    exoplayer                       : "com.google.android.exoplayer:exoplayer:${libVersions.exoplayer}",
+                    youtubeExtractor                : "com.github.HaarigerHarald:android-youtubeExtractor:${libVersions.youtubeExtractor}"
             ],
 
             annotationProcessor: [

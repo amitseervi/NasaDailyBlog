@@ -40,6 +40,8 @@ android {
         def LOGGING_ENABLED_KEY = "logEnabled"
         def flavourConfig = rootProject.ext.flavourConfig
         def NETWORK_CACHE_SIZE = "NETWORK_CACHE_SIZE"
+        def MAX_AGE = "MAX_AGE"
+        def MAX_STALE = "MAX_STALE"
 
         dev {
             // Assigns this product flavor to the "version" flavor dimension.
@@ -53,6 +55,8 @@ android {
             buildConfigField("String", NASA_BASE_API_URL, flavourConfig.dev.nasaApi)
             buildConfigField("String", NASA_API_KEY, flavourConfig.dev.apiKey)
             buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+            buildConfigField("Long", MAX_AGE, flavourConfig.dev.maxAge)
+            buildConfigField("Long", MAX_STALE, flavourConfig.dev.maxStale)
 
         }
 
@@ -64,6 +68,8 @@ android {
             buildConfigField("String", NASA_BASE_API_URL, flavourConfig.qa.nasaApi)
             buildConfigField("String", NASA_API_KEY, flavourConfig.qa.apiKey)
             buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+            buildConfigField("Long", MAX_AGE, flavourConfig.qa.maxAge)
+            buildConfigField("Long", MAX_STALE, flavourConfig.qa.maxStale)
         }
 
         prod {
@@ -74,6 +80,8 @@ android {
             buildConfigField("String", NASA_BASE_API_URL, flavourConfig.prod.nasaApi)
             buildConfigField("String", NASA_API_KEY, flavourConfig.prod.apiKey)
             buildConfigField("Long", NETWORK_CACHE_SIZE, flavourConfig.dev.cacheSize)
+            buildConfigField("Long", MAX_AGE, flavourConfig.prod.maxAge)
+            buildConfigField("Long", MAX_STALE, flavourConfig.prod.maxStale)
         }
 
         logged {
@@ -143,5 +151,8 @@ dependencies {
     kapt libs.annotationProcessor.dagger
     kapt libs.annotationProcessor.daggerAndroid
 
-    implementation  libs.impl.materialDesign
+    implementation libs.impl.materialDesign
+    implementation libs.impl.touchView
+    implementation libs.impl.exoplayer
+    implementation libs.impl.youtubeExtractor
 }

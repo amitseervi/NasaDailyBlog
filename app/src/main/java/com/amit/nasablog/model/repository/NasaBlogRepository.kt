@@ -15,7 +15,7 @@ class NasaBlogRepository @Inject constructor(
     val blogData = BlogData()
     fun loadBlog(date: String? = null) {
         if (blogData.networkStatus.value == NetworkStatus.IN_PROGRESS) {
-            return
+            compositeDisposable.dispose()
         }
         setNetworkStatus(NetworkStatus.IN_PROGRESS)
         val disposable = api.getBlogData(BuildConfig.NASA_API_KEY, date)
@@ -27,7 +27,7 @@ class NasaBlogRepository @Inject constructor(
                     setBlogData(it.body())
                 } else {
                     setBlogData(null)
-                    setError(Exception("Server error occured"))
+                    setError(Exception(it.message()))
                 }
             }, {
                 setNetworkStatus(NetworkStatus.IDLE)

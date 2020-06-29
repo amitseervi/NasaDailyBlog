@@ -56,7 +56,7 @@ abstract class AppModule {
         fun provideOkHTTPClient(context: Application): OkHttpClient {
             val okHttpClient = OkHttpClient.Builder()
             okHttpClient.cache(Cache(context.cacheDir, BuildConfig.NETWORK_CACHE_SIZE))
-            okHttpClient.addInterceptor(NetworkCacheInterceptor())
+            okHttpClient.addNetworkInterceptor(NetworkCacheInterceptor())
             okHttpClient.addNetworkInterceptor(StethoInterceptor())
             return okHttpClient.build()
         }
