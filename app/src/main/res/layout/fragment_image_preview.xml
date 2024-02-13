@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/black">
 
-        <com.ortiz.touchview.TouchImageView
+        <com.amit.nasablog.ui.view.ImagePinchView
             android:id="@+id/touch_img"
             android:layout_width="0dp"
             android:layout_height="0dp"

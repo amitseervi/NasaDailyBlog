@@ -146,7 +146,6 @@ dependencies {
 
     implementation(libs.android.youtubeExtractor)
     implementation(libs.androidx.lifecycle.extensions)
-    implementation(libs.touchImageView)
     implementation(libs.timber)
     implementation(libs.logging.interceptor)
 }
