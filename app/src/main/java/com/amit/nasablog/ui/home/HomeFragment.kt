@@ -31,20 +31,6 @@ import kotlinx.coroutines.launch
 class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
     private val viewModel: HomeViewModel by viewModels()
-    private val menuProvider = object : MenuProvider {
-        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.menu_home, menu)
-        }
-
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            if (menuItem.itemId == R.id.calendar_date_select) {
-                showDatePicker()
-                return true
-            }
-            return false
-        }
-
-    }
 
 
     private fun bindViewModel() {
@@ -68,7 +54,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
     }
 
     private fun bindMenu() {
-        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
+        binding?.toolbar?.inflateMenu(R.menu.menu_home)
+        binding?.toolbar?.setOnMenuItemClickListener {
+            if (it.itemId == R.id.calendar_date_select) {
+                showDatePicker()
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun showProgress(show: Boolean) {

@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import com.amit.nasablog.R
 import com.amit.nasablog.databinding.FragmentImagePreviewBinding
@@ -15,7 +16,8 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 
-class ImagePreviewFragment : BaseFragment<FragmentImagePreviewBinding>(R.layout.fragment_image_preview) {
+class ImagePreviewFragment :
+    BaseFragment<FragmentImagePreviewBinding>(R.layout.fragment_image_preview) {
     private var blogDetail: BlogDetail? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +33,10 @@ class ImagePreviewFragment : BaseFragment<FragmentImagePreviewBinding>(R.layout.
         super.onViewCreated(view, savedInstanceState)
         binding?.contentProgress?.show()
         blogDetail?.let { detail ->
-            binding?.touchImg?.let { touchView ->
-                Glide.with(touchView).load(detail.hdurl)
-                    .listener(object : RequestListener<Drawable> {
+            binding?.touchImg?.let { touchImageView: ImageView ->
+                Glide.with(touchImageView)
+                    .load(detail.hdurl)
+                    .addListener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(
                             e: GlideException?,
                             model: Any?,
@@ -56,8 +59,7 @@ class ImagePreviewFragment : BaseFragment<FragmentImagePreviewBinding>(R.layout.
                             binding?.contentProgress?.hide()
                             return false
                         }
-
-                    }).into(touchView)
+                    }).into(touchImageView)
             }
         }
     }

@@ -18,9 +18,6 @@ class NasaBlogRepository @Inject constructor(
         get() = _repoStatus
 
     suspend fun loadBlog(date: String? = null) {
-        if (_repoStatus.value is InProgress) {
-            return
-        }
         _repoStatus.emit(InProgress())
         val response = api.getBlogData(BuildConfig.NASA_API_KEY, date)
         if (response.isSuccessful) {
