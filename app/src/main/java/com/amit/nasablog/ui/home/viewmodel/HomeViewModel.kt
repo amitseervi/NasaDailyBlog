@@ -1,56 +1,75 @@
 package com.amit.nasablog.ui.home.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.amit.nasablog.model.entity.BlogDetail
 import com.amit.nasablog.model.repository.NasaBlogRepository
-import com.amit.nasablog.model.repository.NetworkStatus
+import com.amit.nasablog.model.repository.RepoStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
+@HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: NasaBlogRepository
 ) : ViewModel() {
-    private val liveBlogData = repository.blogData
     var currentSelectedDate: Long = 0
         private set
 
-    fun loadBlog() {
-        repository.loadBlog()
-    }
+    private val _currentBlogDetail: MutableStateFlow<BlogDetail?> = MutableStateFlow(null)
 
-    fun loadBlogForDate(date: Date) {
+    val blogDetail: StateFlow<BlogDetail?>
+        get() = _currentBlogDetail
 
-        repository.loadBlog()
-    }
+    private val _errorResponse: MutableStateFlow<Throwable?> = MutableStateFlow(null)
 
-    fun getBlogDetail(): LiveData<BlogDetail> {
-        return liveBlogData.liveBlogDetail
-    }
+    val errorResponse: StateFlow<Throwable?>
+        get() = _errorResponse
 
-    fun getError(): LiveData<Throwable> {
-        return liveBlogData.errorData
-    }
+    private val _showProgress: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    fun showProgress(): LiveData<Boolean> {
-        return Transformations.map(liveBlogData.networkStatus) {
-            it == NetworkStatus.IN_PROGRESS
+    val showProgress: StateFlow<Boolean>
+        get() = _showProgress
+
+    init {
+        viewModelScope.launch {
+            repository.status.collectLatest {
+                if (it is RepoStatus.Success) {
+                    _currentBlogDetail.emit(it.data)
+                    _errorResponse.emit(null)
+                    _showProgress.emit(false)
+                } else if (it is RepoStatus.Error) {
+                    _errorResponse.emit(RuntimeException(it.message))
+                    _showProgress.emit(false)
+                } else {
+                    _errorResponse.emit(null)
+                    _showProgress.emit(true)
+                }
+            }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        repository.dispose()
+    fun loadBlog() {
+        viewModelScope.launch {
+            repository.loadBlog()
+        }
     }
+
 
     fun onDateClicked(it: Long?) {
         it ?: return
         currentSelectedDate = it
         val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val formatedDate = simpleDateFormat.format(Date(it))
-        repository.loadBlog(formatedDate)
+        val formattedDate = simpleDateFormat.format(Date(it))
+        viewModelScope.launch {
+            repository.loadBlog(formattedDate)
+        }
     }
 
 }

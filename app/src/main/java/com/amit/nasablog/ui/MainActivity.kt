@@ -1,13 +1,14 @@
 package com.amit.nasablog.ui
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.amit.nasablog.R
 import com.amit.nasablog.databinding.ActivityMainBinding
-import dagger.android.HasAndroidInjector
-import dagger.android.support.DaggerAppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : DaggerAppCompatActivity(), HasAndroidInjector {
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
     private lateinit var viewDataBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

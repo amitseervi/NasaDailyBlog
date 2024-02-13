@@ -4,18 +4,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import dagger.android.support.DaggerFragment
+import androidx.fragment.app.Fragment
 
-abstract class BaseFragment<T : ViewDataBinding>(contentLayoutId: Int) :
-    DaggerFragment(contentLayoutId) {
-    private var binding: T? = null
+abstract class BaseFragment<T : ViewDataBinding>(contentLayoutId: Int) : Fragment(contentLayoutId) {
+    private var _binding: T? = null
+    val binding: T?
+        get() = _binding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = DataBindingUtil.bind<T>(view)!!
-    }
-
-    fun getBinding(): T? {
-        return binding
+        _binding = DataBindingUtil.bind<T>(view)!!
     }
 }

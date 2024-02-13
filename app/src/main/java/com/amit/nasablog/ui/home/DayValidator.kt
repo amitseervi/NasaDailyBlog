@@ -5,22 +5,20 @@ import android.os.Parcelable
 import com.google.android.material.datepicker.CalendarConstraints
 import java.util.*
 
-class DayValidator : CalendarConstraints.DateValidator {
+class DayValidator() : CalendarConstraints.DateValidator {
     private val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
     private val current = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    val CREATOR: Parcelable.Creator<DayValidator?> =
-        object : Parcelable.Creator<DayValidator?> {
-            override fun createFromParcel(source: Parcel): DayValidator {
-                return DayValidator()
-            }
 
-            override fun newArray(size: Int): Array<DayValidator?> {
-                return arrayOfNulls(size)
-            }
-        }
+    constructor(parcel: Parcel) : this()
 
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
+    override fun describeContents(): Int {
+        return 0
     }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        
+    }
+
 
     override fun isValid(d: Long): Boolean {
         utc.timeInMillis = d
@@ -54,12 +52,13 @@ class DayValidator : CalendarConstraints.DateValidator {
         return true
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    companion object CREATOR : Parcelable.Creator<DayValidator> {
+        override fun createFromParcel(parcel: Parcel): DayValidator {
+            return DayValidator(parcel)
+        }
 
-    override fun hashCode(): Int {
-        val hashedFields = arrayOf<Any>()
-        return hashedFields.contentHashCode()
+        override fun newArray(size: Int): Array<DayValidator?> {
+            return arrayOfNulls(size)
+        }
     }
 }

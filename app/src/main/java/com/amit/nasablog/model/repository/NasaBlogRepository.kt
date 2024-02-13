@@ -3,58 +3,38 @@ package com.amit.nasablog.model.repository
 import com.amit.nasablog.BuildConfig
 import com.amit.nasablog.model.api.NasaApi
 import com.amit.nasablog.model.entity.BlogDetail
-import com.amit.nasablog.utils.AppExecutors
-import io.reactivex.disposables.CompositeDisposable
+import com.amit.nasablog.model.repository.RepoStatus.InProgress
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class NasaBlogRepository @Inject constructor(
     private val api: NasaApi,
-    private val executor: AppExecutors
 ) {
-    private val compositeDisposable = CompositeDisposable()
-    val blogData = BlogData()
-    fun loadBlog(date: String? = null) {
-        if (blogData.networkStatus.value == NetworkStatus.IN_PROGRESS) {
-            compositeDisposable.dispose()
+
+    private val _repoStatus: MutableStateFlow<RepoStatus<BlogDetail>> =
+        MutableStateFlow(InProgress())
+    val status: StateFlow<RepoStatus<BlogDetail>>
+        get() = _repoStatus
+
+    suspend fun loadBlog(date: String? = null) {
+        if (_repoStatus.value is InProgress) {
+            return
         }
-        setNetworkStatus(NetworkStatus.IN_PROGRESS)
-        val disposable = api.getBlogData(BuildConfig.NASA_API_KEY, date)
-            .subscribeOn(executor.networkIOScheduler())
-            .observeOn(executor.mainThreadScheduler())
-            .subscribe({
-                setNetworkStatus(NetworkStatus.IDLE)
-                if (it.isSuccessful) {
-                    setBlogData(it.body())
+        _repoStatus.emit(InProgress())
+        val response = api.getBlogData(BuildConfig.NASA_API_KEY, date)
+        if (response.isSuccessful) {
+            response.body().let { blogDetail ->
+                if (blogDetail != null) {
+                    _repoStatus.emit(RepoStatus.Success(blogDetail))
                 } else {
-                    setBlogData(null)
-                    setError(Exception(it.message()))
+                    _repoStatus.emit(RepoStatus.Error(4000, "Null blog value returned from api"))
                 }
-            }, {
-                setNetworkStatus(NetworkStatus.IDLE)
-                setError(it)
-            })
-        compositeDisposable.add(disposable)
-    }
+            }
 
-    fun setBlogData(data: BlogDetail?) {
-        setError(null)
-        blogData.liveBlogDetail.postValue(data)
-    }
-
-    fun setError(error: Throwable?) {
-        blogData.errorData.postValue(error)
-    }
-
-    fun setNetworkStatus(status: NetworkStatus) {
-        blogData.networkStatus.postValue(status)
-    }
-
-    fun getNetworkStatus(): NetworkStatus {
-        return blogData.networkStatus.value ?: NetworkStatus.IDLE
-    }
-
-    fun dispose() {
-        compositeDisposable.dispose()
+        } else {
+            _repoStatus.emit(RepoStatus.Error(response.code(), response.message()))
+        }
     }
 }
 

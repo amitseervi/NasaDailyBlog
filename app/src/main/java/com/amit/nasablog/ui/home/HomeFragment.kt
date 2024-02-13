@@ -7,13 +7,13 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.core.view.MenuProvider
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.amit.nasablog.R
 import com.amit.nasablog.databinding.FragmentHomeBinding
 import com.amit.nasablog.model.entity.BlogDetail
-import com.amit.nasablog.ui.NasaBlogAppViewModelProvider
 import com.amit.nasablog.ui.base.BaseFragment
 import com.amit.nasablog.ui.error.ErrorDialogFragment
 import com.amit.nasablog.ui.home.viewmodel.HomeViewModel
@@ -22,48 +22,73 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.datepicker.MaterialDatePicker
-import kotlinx.android.synthetic.main.fragment_home.view.*
-import timber.log.Timber
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
+@AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
-    @Inject
-    lateinit var viewModelProvider: NasaBlogAppViewModelProvider
+    private val viewModel: HomeViewModel by viewModels()
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.menu_home, menu)
+        }
 
-    private lateinit var viewModel: HomeViewModel
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            if (menuItem.itemId == R.id.calendar_date_select) {
+                showDatePicker()
+                return true
+            }
+            return false
+        }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = viewModelProvider.create(HomeViewModel::class.java)
-        viewModel.loadBlog()
+    }
+
+
+    private fun bindViewModel() {
+        lifecycleScope.launch {
+            viewModel.blogDetail.collectLatest {
+                setBlogDetail(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.errorResponse.collectLatest {
+                setError(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.showProgress.collectLatest {
+                showProgress(it)
+            }
+        }
+    }
+
+    private fun bindMenu() {
+        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
+    }
+
+    private fun showProgress(show: Boolean) {
+        if (show) {
+            binding?.contentProgress?.show()
+        } else {
+            binding?.contentProgress?.hide()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as? AppCompatActivity)?.setSupportActionBar(view.toolbar)
-        setHasOptionsMenu(true)
-        viewModel.getBlogDetail().observe(viewLifecycleOwner, Observer {
-            setBlogDetail(it)
-        })
+        bindViewModel()
+        bindMenu()
 
-        viewModel.getError().observe(viewLifecycleOwner, Observer {
-            setError(it)
-        })
-
-        viewModel.showProgress().observe(viewLifecycleOwner, Observer {
-            Timber.tag("amittest").d("Show progress ${it}")
-            if (it) {
-                view.content_progress?.show()
-            } else {
-                view.content_progress?.hide()
-            }
-        })
-        getBinding()?.let { binding ->
+        viewModel.loadBlog()
+        binding?.let { binding ->
             binding.viewModel = viewModel
             binding.fab.setOnClickListener {
-                val blogDetail = viewModel.getBlogDetail().value ?: return@setOnClickListener
+                val blogDetail = viewModel.blogDetail.value ?: return@setOnClickListener
                 val args = Bundle()
                 args.putSerializable(ImagePreviewFragment.BUNDLE_ARG_BLOG_DETAIL, blogDetail)
                 if (blogDetail.isVideoSource()) {
@@ -86,25 +111,25 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
     private fun setBlogDetail(blogDetail: BlogDetail?) {
         val imgUrl = blogDetail?.getThumbnail()
         if (imgUrl.isNullOrBlank()) {
-            view?.iv_img?.visibility = View.GONE
+            binding?.ivImg?.visibility = View.GONE
         }
-        view?.let { view ->
-            view.iv_img.visibility = View.VISIBLE
+        binding?.let { binding ->
+            binding.ivImg.visibility = View.VISIBLE
             val requestOptions = RequestOptions().fitCenter()
-                .transform(RoundedCorners(view.context.resources.getDimensionPixelSize(R.dimen.img_corner_radius)))
-            Glide.with(view.iv_img).applyDefaultRequestOptions(requestOptions)
-                .load(imgUrl).into(view.iv_img)
+                .transform(RoundedCorners(requireContext().resources.getDimensionPixelSize(R.dimen.img_corner_radius)))
+            Glide.with(binding.ivImg).applyDefaultRequestOptions(requestOptions)
+                .load(imgUrl).into(binding.ivImg)
 
             blogDetail?.let { blog ->
                 if (blog.isVideoSource()) {
-                    view.fab.show()
-                    view.fab.setImageResource(R.drawable.ic_play_button)
+                    binding.fab.show()
+                    binding.fab.setImageResource(R.drawable.ic_play_button)
                 } else {
                     if (blog.url.isNullOrBlank()) {
-                        view.fab.hide()
+                        binding.fab.hide()
                     } else {
-                        view.fab.show()
-                        view.fab.setImageResource(R.drawable.ic_fullscreen)
+                        binding.fab.show()
+                        binding.fab.setImageResource(R.drawable.ic_fullscreen)
                     }
                 }
             }
@@ -119,18 +144,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
             errorFragment.arguments = args
             errorFragment.show(childFragmentManager, "error_message")
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_home, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.calendar_date_select) {
-            showDatePicker()
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun showDatePicker() {
